@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node tests/main.test.js",
     "start": "nodemon index.js"
   },
   "keywords": [],
@@ -14,6 +14,7 @@
     "nodemon": "^2.0.19"
   },
   "dependencies": {
+    "@fidelve/colorlog": "github:FidelVe/colorLog",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",

@@ -23,7 +23,7 @@ async function connect() {
 async function closeDatabase(connection) {
   await connection.dropDatabase();
   await connection.close();
-  await mogod.stop();
+  await mongod.stop();
 }
 
 const db = {

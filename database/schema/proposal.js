@@ -3,12 +3,17 @@
 // Imports
 const mongoose = require("mongoose");
 const isIPFS = require("is-ipfs");
+const {
+  proposalStates,
+  sponsorDepositStatus,
+  voteTypes
+} = require("../commons");
 /*
  * CPS proposal schema
  */
 
-const proposalSchema = new mongoose.Schema({
-  approved_voters: {
+const ProposalSchema = new mongoose.Schema({
+  approve_voters: {
     type: Number,
     required: [true, "Please specify field"]
   },
@@ -81,7 +86,7 @@ const proposalSchema = new mongoose.Schema({
   },
   sponsor_deposit_status: {
     type: String,
-    enum: ["bond_approved", "bond_received", "bond_returned", "bond_cancelled"],
+    enum: [...sponsorDepositStatus],
     required: [true, "Please specify field"]
   },
   sponsor_vote_reason: {
@@ -94,7 +99,7 @@ const proposalSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["_active", "_completed", "_disqualified", "_paused", "_pending"],
+    enum: [...proposalStates],
     required: [true, "Please specify field"]
   },
   submit_progress_report: {
@@ -144,7 +149,7 @@ const proposalSchema = new mongoose.Schema({
       },
       vote: {
         type: String,
-        enum: ["_approve", "_reject", "_abstain"],
+        enum: [...voteTypes],
         required: [true, "Please specify field"]
       },
       vote_reason: {
@@ -156,5 +161,5 @@ const proposalSchema = new mongoose.Schema({
 });
 
 module.exports = {
-  proposalSchema
+  ProposalSchema
 };
