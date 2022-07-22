@@ -47,6 +47,15 @@ async function proposalTest(collectionId, db) {
 
   // test getProposalById
   await createTest(getProposalById, true, query[0]["_id"], collectionId, db);
+
+  // test getProposalCommentsByProposalId
+  await createTest(
+    getProposalCommentsByProposalId,
+    true,
+    query[0]["_id"],
+    collectionId,
+    db
+  );
 }
 
 module.exports = proposalTest;

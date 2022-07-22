@@ -113,7 +113,7 @@ async function getProposalCommentsByProposalId(proposalId, collectionId, db) {
     collectionId,
     db
   );
-  return query;
+  return query[0].comments;
 }
 
 // UPDATE and/or CREATE methods
