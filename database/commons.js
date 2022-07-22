@@ -3,7 +3,7 @@
 
 // Imports
 //
-const { lib } = require("../utils/lib-no-sdk");
+const { lib } = require("../utils/icon-lib/lib-no-sdk");
 const proposalStates = [
   "_active",
   "_completed",

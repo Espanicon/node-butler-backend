@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node tests/main.test.js",
-    "start": "nodemon index.js"
+    "dev": "nodemon rest-server/index.js"
   },
   "keywords": [],
   "author": "",

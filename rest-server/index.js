@@ -1,4 +1,7 @@
-// index.js server
+// rest-server/index.js
+// REST API server.
+// Gets data from the local mongodb database and serves this data to the
+// clients via a REST API.
 
 // imports
 //
@@ -7,7 +10,7 @@ const express = require("express");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
-const db = require("./database/mongo");
+const db = require("../database/mongo");
 
 morgan.token("body", (req, res) => {
   if (req.body == null) {
