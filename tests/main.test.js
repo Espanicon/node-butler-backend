@@ -2,7 +2,7 @@
 //
 const { runTestModule } = require("./utils");
 const proposalTest = require("./proposal.test");
-const db = require("../database/mongo");
+const db = require("./memoryMongo");
 
 async function runAllTests() {
   // setting up in db to run tests
