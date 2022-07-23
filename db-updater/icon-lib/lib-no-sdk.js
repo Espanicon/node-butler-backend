@@ -217,6 +217,11 @@ async function getAllProposals() {
   return proposals;
 }
 
+async function getMissingProposals(currentProposalsInDb) {
+  // compares the hash of the proposals that are currently in the db with all
+  // the proposals in the ICON Network and only dowloads the missing ones
+}
+
 // Network score methods
 async function getProposals() {
   const JSONRPCObject = makeICXCallRequestObj(

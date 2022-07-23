@@ -10,10 +10,14 @@ const {
   getProposalsByStatus,
   getProposalsByStatusCount,
   getProposalCommentsByProposalId,
-  updateProposalCommentsByProposalId
+  updateProposalCommentsByProposalId,
+  getProposalsHash
 } = require("../database/services/proposal");
 
 async function proposalTest(collectionId, db) {
+  // test on getProposalsHash
+  await createTest(getProposalsHash, true, collectionId, db);
+
   // test on createProposal
   await createTest(
     createProposal,
@@ -56,6 +60,9 @@ async function proposalTest(collectionId, db) {
     collectionId,
     db
   );
+
+  // test on getProposalsHash
+  await createTest(getProposalsHash, true, collectionId, db);
 }
 
 module.exports = proposalTest;

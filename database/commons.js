@@ -3,7 +3,7 @@
 
 // Imports
 //
-const { lib } = require("../utils/icon-lib/lib-no-sdk");
+const { hexToDecimal, decimalToHex, fromHexInLoop } = require("../utils/utils");
 const proposalStates = [
   "_active",
   "_completed",
@@ -61,21 +61,17 @@ function parseProposalData(rawProposalData) {
       // if entry is of type Date
 
       // convert from hex to Number
-      let dataValue = parseInt(lib.hexToDecimal(rawProposalData[eachKey]));
+      let dataValue = parseInt(hexToDecimal(rawProposalData[eachKey]));
       // convert from decimal in microseconds to Date
       parsedData[eachKey] = new Date(dataValue / 1000);
     } else if (arrayOfLoopEntries.includes(eachKey)) {
       // if entry is of type loop
 
       // convert loop in hex to decimal
-      parsedData[eachKey] = parseInt(
-        lib.fromHexInLoop(rawProposalData[eachKey])
-      );
+      parsedData[eachKey] = parseInt(fromHexInLoop(rawProposalData[eachKey]));
     } else if (arrayOfHexEntries.includes(eachKey)) {
       // if entry is of type Number
-      parsedData[eachKey] = parseInt(
-        lib.hexToDecimal(rawProposalData[eachKey])
-      );
+      parsedData[eachKey] = parseInt(hexToDecimal(rawProposalData[eachKey]));
     }
   }
 

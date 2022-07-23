@@ -27,7 +27,7 @@ async function getProposalByParams(params, collectionId, db) {
   return query;
 }
 
-async function getProposalByParamsCustom(params, selectObj, collectionId, db) {
+async function getReducedProposalByParams(params, selectObj, collectionId, db) {
   /*
    *
    */
@@ -107,13 +107,28 @@ async function getProposalCommentsByProposalId(proposalId, collectionId, db) {
    * gets all the comments of a specific proposal, querying by proposal ID
    * (mongodb _id)
    */
-  const query = await getProposalByParamsCustom(
+  const query = await getReducedProposalByParams(
     { _id: proposalId },
     { comments: 1 },
     collectionId,
     db
   );
   return query[0].comments;
+}
+
+async function getProposalsHash(collectionId, db) {
+  // gets the hash of all the proposals in the db
+  const query = await getReducedProposalByParams(
+    {},
+    { ipfs_hash: 1 },
+    collectionId,
+    db
+  );
+
+  let parsedResult = query.map(reducedProposals => {
+    return reducedProposals.ipfs_hash;
+  });
+  return parsedResult;
 }
 
 // UPDATE and/or CREATE methods
@@ -198,5 +213,6 @@ module.exports = {
   getProposalsByStatus,
   getProposalsByStatusCount,
   getProposalCommentsByProposalId,
-  updateProposalCommentsByProposalId
+  updateProposalCommentsByProposalId,
+  getProposalsHash
 };

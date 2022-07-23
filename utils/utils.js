@@ -30,7 +30,23 @@ function makeAPIResponseMsg(responseData, success = true, statusCode = false) {
   };
 }
 
+function hexToDecimal(hex) {
+  return parseInt(hex, 16);
+}
+
+function decimalToHex(number) {
+  return "0x" + number.toString(16);
+}
+
+function fromHexInLoop(loopInHex) {
+  let loopInBase2 = hexToDecimal(loopInHex);
+  return loopInBase2 / 10 ** 18;
+}
+
 module.exports = {
   makeDBOperationResponseMsg,
-  makeAPIResponseMsg
+  makeAPIResponseMsg,
+  hexToDecimal,
+  decimalToHex,
+  fromHexInLoop
 };
