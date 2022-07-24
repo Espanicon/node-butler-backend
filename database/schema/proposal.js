@@ -90,8 +90,7 @@ const ProposalSchema = new mongoose.Schema({
     required: [true, "Please specify field"]
   },
   sponsor_vote_reason: {
-    type: String,
-    required: [true, "Please specify field"]
+    type: String
   },
   sponsored_timestamp: {
     type: Date,

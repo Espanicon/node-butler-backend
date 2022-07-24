@@ -151,7 +151,7 @@ async function getCPSPeriodStatus() {
   return request.result;
 }
 
-async function getProposalKeysByStatus(status) {
+async function getCPSProposalKeysByStatus(status) {
   const JSONRPCObject = makeICXCallRequestObj(
     "get_proposals_keys_by_status",
     { _status: status },
@@ -167,7 +167,7 @@ async function getProposalKeysByStatus(status) {
   }
 }
 
-async function getProposalDetailsByHash(hash) {
+async function getCPSProposalDetailsByHash(hash) {
   const JSONRPCObject = makeICXCallRequestObj(
     "get_proposal_details_by_hash",
     { _ipfs_key: hash },
@@ -179,7 +179,7 @@ async function getProposalDetailsByHash(hash) {
   return request.result;
 }
 
-async function getVoteResultsByHash(hash) {
+async function getCPSVoteResultsByHash(hash) {
   const JSONRPCObject = makeICXCallRequestObj(
     "get_vote_result",
     { _ipfs_key: hash },
@@ -191,7 +191,7 @@ async function getVoteResultsByHash(hash) {
   return request.result;
 }
 
-async function getAllProposals() {
+async function getAllCPSProposals() {
   let proposals = {
     _active: [],
     _completed: [],
@@ -201,11 +201,11 @@ async function getAllProposals() {
   };
 
   for (let eachStatus of statusType) {
-    const proposalsKeys = await getProposalKeysByStatus(eachStatus);
+    const proposalsKeys = await getCPSProposalKeysByStatus(eachStatus);
 
     for (let eachProposal of proposalsKeys) {
-      const proposal = await getProposalDetailsByHash(eachProposal);
-      const comments = await getVoteResultsByHash(eachProposal);
+      const proposal = await getCPSProposalDetailsByHash(eachProposal);
+      const comments = await getCPSVoteResultsByHash(eachProposal);
 
       proposals[eachStatus].push({
         proposal: proposal,
@@ -217,9 +217,47 @@ async function getAllProposals() {
   return proposals;
 }
 
-async function getMissingProposals(currentProposalsInDb) {
+async function getCPSMissingProposalsKeys(currentProposalsInDb = []) {
+  // compares the hash of the proposals that are currently in the db with all
+  // the proposals in the ICON Network and returns a list of the keys of the
+  // missing proposals
+  let missingProposalsKeys = [];
+
+  for (let eachStatus of statusType) {
+    const proposalsKeys = await getCPSProposalKeysByStatus(eachStatus);
+
+    proposalsKeys.map(eachKey => {
+      if (currentProposalsInDb.includes(eachKey)) {
+        // do nothing
+      } else {
+        missingProposalsKeys.push(eachKey);
+      }
+    });
+  }
+
+  return missingProposalsKeys;
+}
+
+async function getCPSMissingProposals(currentProposalsInDb = []) {
   // compares the hash of the proposals that are currently in the db with all
   // the proposals in the ICON Network and only dowloads the missing ones
+  const missingProposalsKeys = await getCPSMissingProposalsKeys(
+    currentProposalsInDb
+  );
+  let missingProposals = [];
+
+  for (let eachProposal of missingProposalsKeys) {
+    console.log(`fetching ${eachProposal}`);
+    const proposal = await getCPSProposalDetailsByHash(eachProposal);
+    const comments = await getCPSVoteResultsByHash(eachProposal);
+
+    missingProposals.push({
+      proposal: proposal,
+      comments: comments
+    });
+  }
+
+  return missingProposals;
 }
 
 // Network score methods
@@ -366,10 +404,11 @@ async function getLastBlock() {
 const lib = {
   cps: {
     getCPSPeriodStatus,
-    getProposalKeysByStatus,
-    getProposalDetailsByHash,
-    getVoteResultsByHash,
-    getAllProposals
+    getCPSProposalKeysByStatus,
+    getCPSProposalDetailsByHash,
+    getCPSVoteResultsByHash,
+    getAllCPSProposals,
+    getCPSMissingProposals
   },
   governance: {
     getScoreApi,

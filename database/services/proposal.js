@@ -141,16 +141,15 @@ async function createProposal(proposalData, collectionId, db) {
     "Error: unknown error",
     false
   );
+  let newProposal = null;
 
   // parse data comming from CPS smart contracts
   let parsedProposalData = parseProposalData(proposalData);
 
   try {
     const ProposalModel = db.model(collectionId, ProposalSchema, collectionId);
-    const newProposal = await new ProposalModel(parsedProposalData).save();
-    operationResult = makeDBOperationResponseMsg(
-      `Proposal created. proposal: ${JSON.stringify(newProposal)}`
-    );
+    newProposal = await new ProposalModel(parsedProposalData).save();
+    operationResult = makeDBOperationResponseMsg(newProposal);
   } catch (err) {
     console.log("Catched Error.");
     console.log(err.name, err.message);
@@ -204,6 +203,17 @@ async function updateProposalCommentsByProposalId(
   );
   return query;
 }
+async function deleteOneByFilter(filter, collectionId, db) {
+  //
+  const ProposalModel = db.model(collectionId, ProposalSchema, collectionId);
+  const query = await ProposalModel.deleteOne(filter);
+  return query;
+}
+async function deleteOneProposalByProposalHash(hash, collectionId, db) {
+  //
+  const query = await deleteOneByFilter({ ipfs_hash: hash }, collectionId, db);
+  return query;
+}
 
 module.exports = {
   createProposal,
@@ -214,5 +224,6 @@ module.exports = {
   getProposalsByStatusCount,
   getProposalCommentsByProposalId,
   updateProposalCommentsByProposalId,
-  getProposalsHash
+  getProposalsHash,
+  deleteOneProposalByProposalHash
 };
