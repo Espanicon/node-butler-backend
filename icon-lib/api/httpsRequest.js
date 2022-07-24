@@ -24,7 +24,7 @@ async function httpsRequest(params, data = false, runSecured = true) {
   const promisifiedQuery = new Promise((resolve, reject) => {
     const query = method.request(params, res => {
       // Print status code on console
-      //console.log("Status Code: " + res.statusCode);
+      // console.log("Status Code: " + res.statusCode);
       // console.log("headers: ", res.headers);
       // console.log("Params:");
       // console.log(params);
@@ -44,6 +44,8 @@ async function httpsRequest(params, data = false, runSecured = true) {
       // when request completed, pass the data to the 'resolve' callback
       res.on("end", () => {
         let data;
+        // console.log("rawData");
+        // console.log(rawData);
         try {
           data = JSON.parse(rawData);
           resolve(data);

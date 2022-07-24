@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node tests/main.test.js",
     "dev": "nodemon rest-server/index.js",
-    "dbManager": "node db-manager/index.js"
+    "dbManager": "node db-manager/index.js",
+    "start": "node rest-server/index.js"
   },
   "keywords": [],
   "author": "",
