@@ -31,7 +31,9 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 app.use(
-  morgan("> :method :url :status :body - :response-time ms \n-----------\n")
+  morgan(
+    "> :method :req[header] :url :status :body - :response-time ms \n-----------\n"
+  )
 );
 app.use(express.static(path.join(__dirname, "www")));
 
@@ -48,35 +50,32 @@ async function runAsync() {
   //
   // GET proposals
   app.get("/node-butler/cps-proposals", async (req, res) => {
-    if (req.accepts(["json", "application/json"])) {
-      // do nothing, the request has the correct type and will be
-      // handle correctly
-    } else {
-      res
-        .set("Connection", "close")
-        .status(406)
-        .json({
-          res: "Unsopported 'Content-Type'",
-          status: 406
-        });
-    }
-
     // predifined response in case of failure on the server side
     let query = { res: null, status: 500 };
 
-    // handle request accordingly depending on database status
-    if (DB_CONNECTION == null) {
-      // if mongodb is offline send response with status 500
-      res.set("Connection", "close").status(500);
+    // if the request Accepts json
+    if (req.accepts(["json", "application/json"])) {
+      // handle request accordingly depending on database status
+      if (DB_CONNECTION == null) {
+        // if mongodb is offline send response with status 500
+        res.set("Connection", "close").status(500);
+      } else {
+        // if mongodb is online send response with the result of the
+        // query and status 200
+        query = await getAllProposals(COLLECTION_ID, DB_CONNECTION);
+        res.set("Connection", "close").status(200);
+      }
     } else {
-      // if mongodb is online send response with the result of the
-      // query and status 200
-      query = await getAllProposals(COLLECTION_ID, DB_CONNECTION);
-      res.set("Connection", "close").status(200);
+      res.set("Connection", "close").status(406);
+      query = {
+        res: "Unsopported 'Content-Type'",
+        status: 406
+      };
     }
 
     // make response
     res.json(query);
+    res.end();
   });
 
   // run server
