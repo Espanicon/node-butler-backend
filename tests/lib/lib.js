@@ -61,7 +61,7 @@ async function getAllCPSProposals() {
   const request = await customRequest(
     "/node-butler/cps-proposals",
     false,
-    "localhost",
+    SCORES.apiHostnames.espanicon,
     false,
     "json"
   );
