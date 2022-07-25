@@ -20,7 +20,7 @@ async function customRequest(
   hostname = SCORES.apiHostnames.espanicon,
   https = true,
   contentType = "text/plain",
-  port = 3000
+  port = 443
 ) {
   let request;
   try {
@@ -32,7 +32,8 @@ async function customRequest(
         "Content-Type": contentType,
         charset: "UTF-8"
       },
-      timeout: 10000
+      timeout: 10000,
+      port: hostname === "localhost" ? 3000 : port
     };
 
     if (https) {
@@ -62,7 +63,7 @@ async function getAllCPSProposals() {
     "/node-butler/cps-proposals",
     false,
     SCORES.apiHostnames.espanicon,
-    false,
+    true,
     "json"
   );
 
