@@ -1,12 +1,14 @@
 // database/mongo.js
 // connects to mongodb database via mongoose
 //
+require("dotenv").config();
 const mongoose = require("mongoose");
 
 async function connect() {
   try {
     // try to connect to mongod.service which should already be running
-    const uri = "mongodb://127.0.0.1:27017/";
+    // const uri = "mongodb://127.0.0.1:27017/";
+    const uri = process.env.URI;
 
     // connecto to database
     const connection = await mongoose

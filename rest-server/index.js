@@ -59,6 +59,11 @@ async function runAsync() {
       if (DB_CONNECTION == null) {
         // if mongodb is offline send response with status 500
         res.set("Connection", "close").status(500);
+        query = {
+          res: "cant connect to db",
+          db_msg: DB_CONNECTION,
+          status: 500
+        };
       } else {
         // if mongodb is online send response with the result of the
         // query and status 200
@@ -79,8 +84,8 @@ async function runAsync() {
   });
 
   // run server
-  app.listen(3000, () => {
-    console.log("Listening on port 3000");
+  app.listen(process.env.REST_PORT, () => {
+    console.log(`Listening on port ${process.env.REST_PORT}`);
   });
 }
 

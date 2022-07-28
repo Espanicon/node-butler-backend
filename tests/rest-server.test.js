@@ -2,10 +2,16 @@
 //
 const { getAllCPSProposals } = require("./lib/lib");
 
+const RUN_LOCAL = true;
 async function runAsync() {
+  let hostname = false;
+
+  if (RUN_LOCAL) {
+    hostname = "localhost";
+  }
   // test getAllCPSProposals
-  let query = await getAllCPSProposals();
-  console.log(JSON.stringify(query).slice(0, 200) + "...)");
+  let query = await getAllCPSProposals(hostname);
+  console.log(JSON.stringify(query));
 }
 
 runAsync();
