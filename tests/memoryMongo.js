@@ -13,7 +13,7 @@ async function connect() {
     // connecto to database
     const connection = await mongoose.createConnection(uri).asPromise();
     console.log("mongoose connected");
-    return connection;
+    return { connection: connection, MMS: mongod };
   } else {
     console.log("Error: mongodb connection already created (mongod != null)");
     console.log(mongod);
@@ -22,12 +22,11 @@ async function connect() {
 
 async function closeDatabase(connection) {
   await connection.close();
-  await mongod.stop();
 }
 
-const db = {
+const db_test = {
   connect,
   closeDatabase
 };
 
-module.exports = db;
+module.exports = db_test;

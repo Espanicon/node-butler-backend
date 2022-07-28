@@ -15,6 +15,7 @@ const { getAllProposals } = require("../database/services/proposal");
 
 const COLLECTION_ID = process.env.COLLECTION_ID;
 let DB_CONNECTION = null;
+let DB_IS_CONNECTED = 0;
 
 morgan.token("body", (req, res) => {
   if (req.body == null) {
@@ -39,7 +40,46 @@ app.use(express.static(path.join(__dirname, "www")));
 
 async function connectDB() {
   // wait for database
-  DB_CONNECTION = await db.connect();
+  if (DB_CONNECTION == null) {
+    DB_CONNECTION = await db.connect();
+  } else {
+    const connectionStatusString =
+      DB_CONNECTION.readyState === 0
+        ? "disconnected"
+        : DB_CONNECTION.readyState === 1
+        ? "connected"
+        : DB_CONNECTION.readyState === 2
+        ? "connecting"
+        : DB_CONNECTION.readyState === 3
+        ? "disconnecting"
+        : DB_CONNECTION.readyState === 4
+        ? "invalid credentials"
+        : "UNKNOWN STATE";
+
+    if (DB_IS_CONNECTED) {
+      // if db is connected dont log db state to console
+    } else {
+      if (DB_IS_CONNECTED === DB_CONNECTION.readyState) {
+        // if db state is the same as it was during last check
+        // dont log to console
+      } else {
+        // if db state has changed since last check log the change
+        // to the console
+        console.log(
+          `\n-----------\nDB connection check returns: ${DB_CONNECTION.readyState} (${connectionStatusString})`
+        );
+        console.log(
+          "This check is repeated every minute but is only logging to console when it changes state. Last reported state is the current state\n-----------\n"
+        );
+        DB_IS_CONNECTED = DB_CONNECTION.readyState;
+      }
+    }
+    if (DB_CONNECTION.readyState === 0) {
+      // if db state is disconnected close db and reconnect
+      await db.closeDatabase(DB_CONNECTION);
+      DB_CONNECTION = await db.connect();
+    }
+  }
 }
 
 async function runAsync() {

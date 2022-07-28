@@ -1,7 +1,7 @@
 // tests/lib/lib.js
 //
 // Imports
-require('dotenv').config()
+require("dotenv").config();
 const customRequest = require("../../espanicon-sdk/utils/customRequest");
 
 // global var declarations
@@ -19,9 +19,9 @@ async function getAllCPSProposals(hostname = false) {
   const request = await customRequest(
     "/node-butler/cps-proposals",
     false,
-    hostname,
+    hostname ? hostname : null,
     hostname ? false : true,
-    hostname ? process.env.REST_PORT: false
+    hostname ? process.env.REST_PORT : false
   );
 
   return request;

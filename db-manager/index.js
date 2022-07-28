@@ -17,7 +17,7 @@ const {
   getProposalsHash,
   deleteOneProposalByProposalHash
 } = require("../database/services/proposal");
-const lib = require("../icon-lib/lib-no-sdk");
+const lib = require("../espanicon-sdk/lib-no-sdk");
 
 const INTERVALS = { oneDay: 1000 * 60 * 60 * 24, oneMinute: 1000 * 60 };
 let CONNECTION_SUCCESS = false;
@@ -134,6 +134,8 @@ const task2 = setInterval(async () => {
     console.log("mongo is offline, skipping check");
   }
 }, INTERVALS.oneDay);
+
+// initial run
 
 // Enable graceful stop
 process.once("SIGINT", () => {
