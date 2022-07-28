@@ -2,7 +2,7 @@
 //
 const { getAllCPSProposals } = require("./lib/lib");
 
-const RUN_LOCAL = true;
+const RUN_LOCAL = false;
 async function runAsync() {
   let hostname = false;
 

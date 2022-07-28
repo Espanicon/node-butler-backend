@@ -10,13 +10,18 @@ const express = require("express");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
+const cors = require("cors");
 const db = require("../database/mongo");
 const { getAllProposals } = require("../database/services/proposal");
 
+// var declarations
+//
 const COLLECTION_ID = process.env.COLLECTION_ID;
 let DB_CONNECTION = null;
 let DB_IS_CONNECTED = 0;
 
+// configure middlewares
+//
 morgan.token("body", (req, res) => {
   if (req.body == null) {
     return {};
@@ -28,7 +33,18 @@ morgan.token("body", (req, res) => {
   }
 });
 
+const corsOptions = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+// create server
+//
 const app = express();
+
+// apply middlewares
 app.use(express.json());
 app.use(helmet());
 app.use(
@@ -89,7 +105,7 @@ async function runAsync() {
   // ENDPOINTS
   //
   // GET proposals
-  app.get("/node-butler/cps-proposals", async (req, res) => {
+  app.get("/node-butler/cps-proposals", cors(corsOptions), async (req, res) => {
     // predifined response in case of failure on the server side
     let query = { res: null, status: 500 };
 
