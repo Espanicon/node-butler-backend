@@ -7,7 +7,8 @@
     "test": "node tests/main.test.js",
     "dev": "nodemon rest-server/index.js",
     "dbManager": "node db-manager/index.js",
-    "start": "node rest-server/index.js"
+    "start": "node rest-server/index.js",
+    "test-rest": "node tests/rest-server.test.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "nodemon": "^2.0.19"
   },
   "dependencies": {
+    "@espanicon/espanicon-sdk": "github:Espanicon/espanicon-sdk",
     "@fidelve/colorlog": "github:FidelVe/colorLog",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",

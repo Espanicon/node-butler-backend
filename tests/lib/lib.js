@@ -2,26 +2,31 @@
 //
 // Imports
 require("dotenv").config();
-const customRequest = require("../../espanicon-sdk/utils/customRequest");
+const NodeButlerSDK = require("../../utils/customLib");
 
-// global var declarations
-const statusType = [
-  "_active",
-  "_completed",
-  "_disqualified",
-  "_paused",
-  "_pending"
-];
+const lib = new NodeButlerSDK();
+
+const { queryMethod: customRequest, statusType } = lib;
 
 // API routes
-async function getAllCPSProposals(hostname = false) {
+async function getAllCPSProposals(hostname) {
   //
+  const params = {
+    route: "/node-butler/cps-proposals",
+    data: false,
+    hostname: hostname,
+    runOverHttps: hostname === "localhost" ? false : true,
+    port: hostname === "localhost" ? process.env.REST_PORT : false
+  };
+
+  console.log("Params for request");
+  console.log(params);
   const request = await customRequest(
-    "/node-butler/cps-proposals",
-    false,
-    hostname ? hostname : null,
-    hostname ? false : true,
-    hostname ? process.env.REST_PORT : false
+    params.route,
+    params.data,
+    params.hostname,
+    params.runOverHttps,
+    params.port
   );
 
   return request;

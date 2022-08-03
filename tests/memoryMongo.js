@@ -17,6 +17,7 @@ async function connect() {
   } else {
     console.log("Error: mongodb connection already created (mongod != null)");
     console.log(mongod);
+    await mongod.stop();
   }
 }
 

@@ -5,24 +5,12 @@
 //
 require("dotenv").config();
 const DB = require("../database/mongo");
-const {
-  createProposal,
-  getAllProposals,
-  getAllProposalsCount,
-  getProposalById,
-  getProposalsByStatus,
-  getProposalsByStatusCount,
-  getProposalCommentsByProposalId,
-  updateProposalCommentsByProposalId,
-  getProposalsHash,
-  deleteOneProposalByProposalHash
-} = require("../database/services/proposal");
-const lib = require("../espanicon-sdk/lib-no-sdk");
+const dbManager = require("./db-manager");
 
 const INTERVALS = { oneDay: 1000 * 60 * 60 * 24, oneMinute: 1000 * 60 };
 let CONNECTION_SUCCESS = false;
 let DB_CONNECTION = null;
-let dailyInterval = null;
+const collectionId = process.env.COLLECTION_ID;
 
 async function connectDB() {
   //
@@ -44,107 +32,42 @@ async function connectDB() {
   }
 }
 
-async function mainAsync() {
-  try {
-    // connecting to db
-    if (DB_CONNECTION == null) {
-      throw new Error("connection error");
-    } else {
-      console.log("Running update on database");
-      const collectionId = process.env.COLLECTION_ID;
-
-      // get the hash of each proposal in the db
-      const proposalsHash = await getProposalsHash(collectionId, DB_CONNECTION);
-      console.log(`Found ${proposalsHash.length} entries in db`);
-
-      // compare all the CPS proposals to the ones in the DB and get the
-      // missing ones
-      const missingProposals = await lib.cps.getCPSMissingProposals(
-        proposalsHash
-      );
-      console.log(
-        `Found ${missingProposals.length} new proposals to add to db.`
-      );
-
-      // add each of the missing proposals to the db
-      if (missingProposals.length > 0) {
-        console.log("Updating db");
-        for (let eachProposal of missingProposals) {
-          console.log(
-            `Adding proposal with hash: ${eachProposal.proposal["ipfs_hash"]}`
-          );
-          const newAddedProposal = await createProposal(
-            eachProposal.proposal,
-            collectionId,
-            DB_CONNECTION
-          );
-          console.log(`Result: ${newAddedProposal.status}`);
-
-          // if proposal added successfully update comments
-          if (newAddedProposal.status === "SUCCESS") {
-            console.log(`Adding comments to proposal entry in db`);
-            const updatedProposal = await updateProposalCommentsByProposalId(
-              eachProposal.comments.data,
-              newAddedProposal.message["_id"],
-              collectionId,
-              DB_CONNECTION
-            );
-          }
-        }
-
-        console.log("Finish updating db");
-      } else {
-        console.log("No update done on local db");
-      }
-
-      // FOR TESTING DELETES ALL ITEMS IN DB
-      // for (let eachHash of proposalsHash) {
-      //   console.log(`deleting: ${eachHash}`);
-      //   await deleteOneProposalByProposalHash(eachHash, collectionId, DB_CONNECTION);
-      // }
-      // FOR TESTING
-
-      // closing connection to db
-      await DB.closeDatabase(DB_CONNECTION);
-      console.log("db closed");
-    }
-  } catch (err) {
-    console.log("Error running main async code");
-    console.log(err);
-  }
-}
-
 // set recursive tasks
-//
-// set task that runs every minute to check if mongo is online
-const task1 = setInterval(async () => {
+
+// set task that runs once a day to update db IF mongo is online
+const task = setInterval(async () => {
+  // connect to db
   await connectDB();
 
-  // if mongo is online run one check inmediatly
+  // check if db is connected and run check
   if (CONNECTION_SUCCESS) {
-    await mainAsync();
-  }
-}, INTERVALS.oneMinute);
-
-// set task that runs day to update db IF mongo is online
-const task2 = setInterval(async () => {
-  if (CONNECTION_SUCCESS) {
-    await mainAsync();
+    await dbManager(DB_CONNECTION, collectionId);
   } else {
     console.log("mongo is offline, skipping check");
   }
+  // closing connection to db
+  await DB.closeDatabase(DB_CONNECTION);
+  DB = null;
+  console.log("db closed");
 }, INTERVALS.oneDay);
-
-// initial run
 
 // Enable graceful stop
 process.once("SIGINT", () => {
   console.log("Terminating execution");
-  clearInterval(task1);
-  clearInterval(task2);
+  clearInterval(task);
   console.log("recursive tasks cleared");
 });
 process.once("SIGTERM", () => {
-  clearInterval(task1);
-  clearInterval(task2);
+  clearInterval(task);
 });
+
+// to run one check inmmediatly set to true the following variable
+const RUN_ONE_CHECK_NOW = false;
+
+async function runNow() {
+  await connectDB();
+  await dbManager(DB_CONNECTION, collectionId);
+}
+if (RUN_ONE_CHECK_NOW) {
+  runNow();
+}

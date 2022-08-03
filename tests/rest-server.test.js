@@ -2,9 +2,9 @@
 //
 const { getAllCPSProposals } = require("./lib/lib");
 
-const RUN_LOCAL = false;
+const RUN_LOCAL = true;
 async function runAsync() {
-  let hostname = false;
+  let hostname = "api.espanicon.team";
 
   if (RUN_LOCAL) {
     hostname = "localhost";
