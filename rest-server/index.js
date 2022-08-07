@@ -13,6 +13,7 @@ const path = require("path");
 const cors = require("cors");
 const db = require("../database/mongo");
 const { getAllProposals } = require("../database/services/proposal");
+const { getAllPrepsData } = require("../database/services/preps");
 
 // var declarations
 //
@@ -105,6 +106,41 @@ async function runAsync() {
 
   // ENDPOINTS
   //
+  // GET preps
+  app.get("/node-butler/preps", cors(corsOptions), async (req, res) => {
+    // predifined response in case of failure on the server side
+    let query = { res: null, status: 500 };
+
+    // if the request Accepts json
+    if (req.accepts(["json", "application/json"])) {
+      // handle request accordingly depending on database status
+      if (DB_CONNECTION == null) {
+        // if mongodb is offline send response with status 500
+        res.set("Connection", "close").status(500);
+        query = {
+          res: "cant connect to db",
+          db_msg: DB_CONNECTION,
+          status: 500
+        };
+      } else {
+        // if mongodb is online send response with the result of the
+        // query and status 200
+        query = await getAllPrepsData(prepsCollection, DB_CONNECTION);
+        res.set("Connection", "close").status(200);
+      }
+    } else {
+      res.set("Connection", "close").status(406);
+      query = {
+        res: "Unsopported 'Content-Type'",
+        status: 406
+      };
+    }
+
+    // make response
+    res.json(query);
+    res.end();
+  });
+
   // GET proposals
   app.get("/node-butler/cps-proposals", cors(corsOptions), async (req, res) => {
     // predifined response in case of failure on the server side
