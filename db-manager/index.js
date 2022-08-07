@@ -45,7 +45,7 @@ async function asyncRun() {
   }
   // closing connection to db
   await DB.closeDatabase(DB_CONNECTION);
-  DB = null;
+  DB_CONNECTION = null;
   console.log("db closed");
 }
 
