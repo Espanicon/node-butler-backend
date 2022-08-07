@@ -11,7 +11,8 @@ const RUN_MEMORY_TEST = false;
 
 let DB = null;
 let mongod = null;
-const collectionId = "test-proposals";
+const proposalsCollectionTest = "test-proposals";
+const prepsCollectionTest = "test-preps";
 
 const db_test = require("./memoryMongo");
 async function runAllTests() {
@@ -34,13 +35,13 @@ async function runAllTests() {
     //   "proposal.test.js",
     //   false,
     //   true,
-    //   collectionId,
+    //   proposalsCollectionTest,
     //   DB
     // );
 
     // run test on db-manager
     console.log("running test on dbManager");
-    await dbManager(DB, collectionId);
+    await dbManager(DB, proposalsCollectionTest, prepsCollectionTest);
 
     // closing db
     if (RUN_MEMORY_TEST) {

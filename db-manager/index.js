@@ -10,7 +10,8 @@ const dbManager = require("./db-manager");
 const INTERVALS = { oneDay: 1000 * 60 * 60 * 24, oneMinute: 1000 * 60 };
 let CONNECTION_SUCCESS = false;
 let DB_CONNECTION = null;
-const collectionId = process.env.COLLECTION_ID;
+const proposalsCollection = process.env.PROPOSALS_COLLECTION;
+const prepsCollection = process.env.PREPS_COLLECTION;
 
 async function connectDB() {
   //
@@ -41,7 +42,7 @@ const task = setInterval(async () => {
 
   // check if db is connected and run check
   if (CONNECTION_SUCCESS) {
-    await dbManager(DB_CONNECTION, collectionId);
+    await dbManager(DB_CONNECTION, proposalsCollection, prepsCollection);
   } else {
     console.log("mongo is offline, skipping check");
   }
@@ -66,7 +67,7 @@ const RUN_ONE_CHECK_NOW = false;
 
 async function runNow() {
   await connectDB();
-  await dbManager(DB_CONNECTION, collectionId);
+  await dbManager(DB_CONNECTION, proposalsCollection, prepsCollection);
 }
 if (RUN_ONE_CHECK_NOW) {
   runNow();

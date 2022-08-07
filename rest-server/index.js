@@ -16,7 +16,8 @@ const { getAllProposals } = require("../database/services/proposal");
 
 // var declarations
 //
-const COLLECTION_ID = process.env.COLLECTION_ID;
+const proposalsCollection = process.env.proposalsCollection;
+const prepsCollection = process.env.PREPS_COLLECTION;
 let DB_CONNECTION = null;
 let DB_IS_CONNECTED = 0;
 
@@ -123,7 +124,7 @@ async function runAsync() {
       } else {
         // if mongodb is online send response with the result of the
         // query and status 200
-        query = await getAllProposals(COLLECTION_ID, DB_CONNECTION);
+        query = await getAllProposals(proposalsCollection, DB_CONNECTION);
         res.set("Connection", "close").status(200);
       }
     } else {

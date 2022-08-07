@@ -2,32 +2,45 @@
 
 // Imports
 //
-const { PrepsSchema } = require("../schema/proposal");
+const { PrepsSchema } = require("../schema/preps");
 const { makeDBOperationResponseMsg } = require("../../utils/utils");
 
 // Functions
 //
 // READONLY methods
 //
-async function makeQueryByParams(params, collectionId, db) {
+async function makeQueryByParams(params, prepsCollection, db) {
   /*
    *
    */
-  const PrepsModel = db.model(collectionId, PrepsSchema, collectionId);
+  const PrepsModel = db.model(prepsCollection, PrepsSchema, prepsCollection);
   const query = await PrepsModel.find(params);
   return query;
 }
-async function getAllPrepsData(collectionId, db) {
+
+async function getAllPrepsData(prepsCollection, db) {
   /*
    * gets all prep
    */
-  const query = await makeQueryByParams({}, collectionId, db);
+  const query = await makeQueryByParams({}, prepsCollection, db);
+  return query;
+}
+
+async function getPrepByPrepAddress(address, prepsCollection, db) {
+  /*
+   * get prep by address
+   */
+  const query = await makeQueryByParams(
+    { address: address },
+    prepsCollection,
+    db
+  );
   return query;
 }
 
 // UPDATE and/or CREATE methods
 //
-async function createPrep(prepData, collectionId, db) {
+async function createPrep(prepData, prepsCollection, db) {
   /*
    * creates a new prep in the db
    */
@@ -38,7 +51,7 @@ async function createPrep(prepData, collectionId, db) {
   let newProposal = null;
 
   try {
-    const PrepsModel = db.model(collectionId, PrepsSchema, collectionId);
+    const PrepsModel = db.model(prepsCollection, PrepsSchema, prepsCollection);
     newProposal = await new PrepsModel(prepData).save();
     operationResult = makeDBOperationResponseMsg(newProposal);
   } catch (err) {
@@ -50,45 +63,55 @@ async function createPrep(prepData, collectionId, db) {
   return operationResult;
 }
 
-async function updatePrepById(newData, prepId, collectionId, db) {
+async function updatePrepById(newData, prepId, prepsCollection, db) {
   /*
    * update prep
    */
-  const PrepsModel = db.model(collectionId, PrepsSchema, collectionId);
+  const PrepsModel = db.model(prepsCollection, PrepsSchema, prepsCollection);
   const query = await PrepsModel.findByIdAndUpdate(prepId, newData);
   return query;
 }
 
-async function updatePrepDetailsByPrepId(newDetails, prepId, collectionId, db) {
+async function updatePrepDetailsByPrepId(
+  newDetails,
+  prepId,
+  prepsCollection,
+  db
+) {
   /*
    * update details.json of Prep
    */
   const query = await updateProposalById(
     { details: newDetails },
     prepId,
-    collectionId,
+    prepsCollection,
     db
   );
   return query;
 }
 
-async function deleteOneByFilter(filter, collectionId, db) {
+async function deleteOneByFilter(filter, prepsCollection, db) {
   /*
    *
    */
-  const PrepsModel = db.model(collectionId, PrepsSchema, collectionId);
+  const PrepsModel = db.model(prepsCollection, PrepsSchema, prepsCollection);
   const query = await PrepsModel.deleteOne(filter);
   return query;
 }
-async function deleteOnePrepByPrepAddress(address, collectionId, db) {
+async function deleteOnePrepByPrepAddress(address, prepsCollection, db) {
   //
-  const query = await deleteOneByFilter({ address: address }, collectionId, db);
+  const query = await deleteOneByFilter(
+    { address: address },
+    prepsCollection,
+    db
+  );
   return query;
 }
 
 module.exports = {
   getAllPrepsData,
   createPrep,
+  getPrepByPrepAddress,
   updatePrepDetailsByPrepId,
   deleteOnePrepByPrepAddress
 };

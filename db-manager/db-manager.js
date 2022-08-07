@@ -15,10 +15,22 @@ const {
   getProposalsHash,
   deleteOneProposalByProposalHash
 } = require("../database/services/proposal");
+
+const {
+  getAllPrepsData,
+  createPrep,
+  getPrepByPrepAddress,
+  updatePrepDetailsByPrepId,
+  deleteOnePrepByPrepAddress
+} = require("../database/services/preps");
+
 const NodeButlerSDK = require("../utils/customLib");
 const lib = new NodeButlerSDK();
 
-async function dbManager(dbConnection, collectionId) {
+async function dbManager(dbConnection, proposalsCollection, prepsCollection) {
+  console.log("collections");
+  console.log(proposalsCollection);
+  console.log(prepsCollection);
   try {
     // connecting to db
     if (dbConnection == null) {
@@ -27,15 +39,60 @@ async function dbManager(dbConnection, collectionId) {
       console.log("Running update on database");
 
       // get the hash of each proposal in the db
-      const proposalsHash = await getProposalsHash(collectionId, dbConnection);
+      const proposalsHash = await getProposalsHash(
+        proposalsCollection,
+        dbConnection
+      );
       console.log(`Found ${proposalsHash.length} entries in db`);
 
       // update proposals in db
-      await updateProposalsInDb(proposalsHash, dbConnection, collectionId);
+      await updateProposalsInDb(
+        proposalsHash,
+        dbConnection,
+        proposalsCollection
+      );
+
+      // get data on all preps
+      // run getPreps
+      const query = await lib.getPreps();
+      const preps = query.preps;
+      // console.log("preps");
+      // console.log(preps);
+
+      // update all preps in the database
+      for (let eachPrep of preps) {
+        console.log(`address ${eachPrep.address}`);
+        const dbPrep = await getPrepByPrepAddress(
+          eachPrep.address,
+          prepsCollection,
+          dbConnection
+        );
+
+        if (dbPrep.length < 1) {
+          // if no result back from db we create the prep in the db
+          const newPrepInDb = await createPrep(
+            { address: eachPrep.address, details: eachPrep.details },
+            prepsCollection,
+            dbConnection
+          );
+        } else {
+          // if the prep exists we update the details.json
+          const newPrepInDb = await updatePrepById(
+            { details: eachPrep.details },
+            dbPrep[0]["_id"],
+            prepsCollection,
+            dbConnection
+          );
+        }
+      }
+
+      // get all preps in db
+      const allPrepsInDb = await getAllPrepsData(prepsCollection, dbConnection);
+      console.log(allPrepsInDb);
 
       // WARNING WARNING WARNING
       // FOR TESTING ONLY. DELETES ALL ITEMS IN DB
-      // await deleteAllProposalsInDb(proposalsHash, dbConnection, collectionId);
+      // await deleteAllProposalsInDb(proposalsHash, dbConnection, proposalsCollection);
       // FOR TESTING
     }
   } catch (err) {
@@ -47,14 +104,14 @@ async function dbManager(dbConnection, collectionId) {
 async function updateProposalsInDb(
   hashOfProposalsInDb,
   dbConnection,
-  collectionId
+  proposalsCollection
 ) {
   // compare all the CPS proposals to the ones in the DB and get the
   // missing ones
   const missingProposals = await getCPSMissingProposals(
     hashOfProposalsInDb,
     dbConnection,
-    collectionId
+    proposalsCollection
   );
 
   // add each of the missing proposals to the db
@@ -66,7 +123,7 @@ async function updateProposalsInDb(
       );
       const newAddedProposal = await createProposal(
         eachProposal.proposal,
-        collectionId,
+        proposalsCollection,
         dbConnection
       );
       console.log(`Result: ${newAddedProposal.status}`);
@@ -77,7 +134,7 @@ async function updateProposalsInDb(
         const updatedProposal = await updateProposalCommentsByProposalId(
           eachProposal.comments.data,
           newAddedProposal.message["_id"],
-          collectionId,
+          proposalsCollection,
           dbConnection
         );
       }
@@ -91,14 +148,12 @@ async function updateProposalsInDb(
 async function getCPSMissingProposals(
   hashOfProposalsInDb,
   dbConnection,
-  collectionId
+  proposalsCollection
 ) {
   // compare all the CPS proposals to the ones in the DB and get the
   // missing ones
   const missingProposals = await lib.getCPSMissingProposals(
-    hashOfProposalsInDb,
-    dbConnection,
-    collectionId
+    hashOfProposalsInDb
   );
   console.log(`Found ${missingProposals.length} new proposals to add to db.`);
   return missingProposals;
@@ -107,7 +162,7 @@ async function getCPSMissingProposals(
 async function deleteAllProposalsInDb(
   hashOfProposalsInDb,
   dbConnection,
-  collectionId
+  proposalsCollection
 ) {
   // WARNING WARNING WARNING
   // FOR TESTING ONLY. DELETES ALL ITEMS IN DB
@@ -120,7 +175,7 @@ async function deleteAllProposalsInDb(
       console.log(`deleting: ${eachHash}`);
       await deleteOneProposalByProposalHash(
         eachHash,
-        collectionId,
+        proposalsCollection,
         dbConnection
       );
     }

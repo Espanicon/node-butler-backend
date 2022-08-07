@@ -14,28 +14,28 @@ const {
   getProposalsHash
 } = require("../database/services/proposal");
 
-async function proposalTest(collectionId, db) {
+async function proposalTest(proposalsCollection, db) {
   // test on getProposalsHash
-  await createTest(getProposalsHash, true, collectionId, db);
+  await createTest(getProposalsHash, true, proposalsCollection, db);
 
   // test on createProposal
   await createTest(
     createProposal,
     true,
     oneProposalData.proposal,
-    collectionId,
+    proposalsCollection,
     db
   );
 
   // test getAllProposals
-  const query = await createTest(getAllProposals, true, collectionId, db);
+  const query = await createTest(getAllProposals, true, proposalsCollection, db);
 
   // test getProposalCommentsByProposalId
   await createTest(
     getProposalCommentsByProposalId,
     true,
     query[0]["_id"],
-    collectionId,
+    proposalsCollection,
     db
   );
 
@@ -45,24 +45,24 @@ async function proposalTest(collectionId, db) {
     true,
     oneProposalData.comments.data,
     query[0]["_id"],
-    collectionId,
+    proposalsCollection,
     db
   );
 
   // test getProposalById
-  await createTest(getProposalById, true, query[0]["_id"], collectionId, db);
+  await createTest(getProposalById, true, query[0]["_id"], proposalsCollection, db);
 
   // test getProposalCommentsByProposalId
   await createTest(
     getProposalCommentsByProposalId,
     true,
     query[0]["_id"],
-    collectionId,
+    proposalsCollection,
     db
   );
 
   // test on getProposalsHash
-  await createTest(getProposalsHash, true, collectionId, db);
+  await createTest(getProposalsHash, true, proposalsCollection, db);
 }
 
 module.exports = proposalTest;
