@@ -28,9 +28,9 @@ const NodeButlerSDK = require("../utils/customLib");
 const lib = new NodeButlerSDK();
 
 async function dbManager(dbConnection, proposalsCollection, prepsCollection) {
-  console.log("collections");
-  console.log(proposalsCollection);
-  console.log(prepsCollection);
+  // console.log("collections");
+  // console.log(proposalsCollection);
+  // console.log(prepsCollection);
   try {
     // connecting to db
     if (dbConnection == null) {
@@ -68,17 +68,33 @@ async function dbManager(dbConnection, proposalsCollection, prepsCollection) {
           dbConnection
         );
 
+        // get prep details
+        const newDetails = await lib.getPrepsDetails(eachPrep.details);
+
+        // parse prep details
+        const hasValidDetails = newDetails == null ? false : true;
+        const newDetailsStringified =
+          newDetails == null ? "null" : JSON.stringify(newDetails);
+
+        // add/update prep details in db
         if (dbPrep.length < 1) {
           // if no result back from db we create the prep in the db
           const newPrepInDb = await createPrep(
-            { address: eachPrep.address, details: eachPrep.details },
+            {
+              address: eachPrep.address,
+              details: newDetailsStringified,
+              has_valid_details: hasValidDetails
+            },
             prepsCollection,
             dbConnection
           );
         } else {
           // if the prep exists we update the details.json
           const newPrepInDb = await updatePrepById(
-            { details: eachPrep.details },
+            {
+              details: newDetailsStringified,
+              has_valid_details: hasValidDetails
+            },
             dbPrep[0]["_id"],
             prepsCollection,
             dbConnection
@@ -88,6 +104,7 @@ async function dbManager(dbConnection, proposalsCollection, prepsCollection) {
 
       // get all preps in db
       const allPrepsInDb = await getAllPrepsData(prepsCollection, dbConnection);
+      console.log("all preps data");
       console.log(allPrepsInDb);
 
       // WARNING WARNING WARNING

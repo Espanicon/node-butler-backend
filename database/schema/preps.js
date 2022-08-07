@@ -19,7 +19,16 @@ const PrepsSchema = new mongoose.Schema({
   },
   details: {
     type: String,
-    required: [true, "Please specify field"]
+    required: [
+      function() {
+        return this.has_valid_details === true;
+      },
+      "details must be specified if has_valid_details is true"
+    ]
+  },
+  has_valid_details: {
+    type: Boolean,
+    require: [true, "Please specify field"]
   }
 });
 

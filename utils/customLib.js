@@ -2,6 +2,8 @@
 //
 // Imports
 const EspaniconSDKNode = require("@espanicon/espanicon-sdk");
+const url = require("url");
+const customRequest = require("./customRequest");
 
 class NodeButlerSDK extends EspaniconSDKNode {
   constructor() {
@@ -10,6 +12,7 @@ class NodeButlerSDK extends EspaniconSDKNode {
       this
     );
     this.getCPSMissingProposals = this.getCPSMissingProposals.bind(this);
+    this.getPrepsDetails = this.getPrepsDetails.bind(this);
   }
   async getCPSMissingProposalsKeys(currentProposalsInDb = []) {
     // compares the hash of the proposals that are currently in the db with all
@@ -51,6 +54,26 @@ class NodeButlerSDK extends EspaniconSDKNode {
     }
 
     return missingProposals;
+  }
+
+  async getPrepsDetails(detailsLink) {
+    const parsedUrl = url.parse(detailsLink);
+    const request = await customRequest(
+      parsedUrl.path,
+      false,
+      parsedUrl.host,
+      parsedUrl.protocol === "https:" ? true : false
+    );
+
+    if (request == null) {
+      // Error was raised and handled inside customRequest, the returned value
+      // is null. Here we continue returning null and let the code logic
+      // after this handle the null values in the most appropiate way depending
+      // on the code logic
+      return request;
+    } else {
+      return request;
+    }
   }
 }
 
