@@ -33,10 +33,7 @@ async function connectDB() {
   }
 }
 
-// set recursive tasks
-
-// set task that runs once a day to update db IF mongo is online
-const task = setInterval(async () => {
+async function asyncRun() {
   // connect to db
   await connectDB();
 
@@ -50,6 +47,12 @@ const task = setInterval(async () => {
   await DB.closeDatabase(DB_CONNECTION);
   DB = null;
   console.log("db closed");
+}
+
+// set recursive tasks
+// set task that runs once a day to update db IF mongo is online
+const task = setInterval(async () => {
+  await asyncRun();
 }, INTERVALS.oneDay);
 
 // Enable graceful stop
@@ -63,12 +66,9 @@ process.once("SIGTERM", () => {
 });
 
 // to run one check inmmediatly set to true the following variable
-const RUN_ONE_CHECK_NOW = false;
+const RUN_ONE_CHECK_NOW = true;
 
-async function runNow() {
-  await connectDB();
-  await dbManager(DB_CONNECTION, proposalsCollection, prepsCollection);
-}
 if (RUN_ONE_CHECK_NOW) {
-  runNow();
+  // run at the beginning once
+  asyncRun();
 }

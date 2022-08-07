@@ -111,6 +111,7 @@ async function deleteOnePrepByPrepAddress(address, prepsCollection, db) {
 module.exports = {
   getAllPrepsData,
   createPrep,
+  updatePrepById,
   getPrepByPrepAddress,
   updatePrepDetailsByPrepId,
   deleteOnePrepByPrepAddress

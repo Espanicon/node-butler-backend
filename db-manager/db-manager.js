@@ -19,6 +19,7 @@ const {
 const {
   getAllPrepsData,
   createPrep,
+  updatePrepById,
   getPrepByPrepAddress,
   updatePrepDetailsByPrepId,
   deleteOnePrepByPrepAddress
@@ -103,9 +104,7 @@ async function dbManager(dbConnection, proposalsCollection, prepsCollection) {
       }
 
       // get all preps in db
-      const allPrepsInDb = await getAllPrepsData(prepsCollection, dbConnection);
-      console.log("all preps data");
-      console.log(allPrepsInDb);
+      // const allPrepsInDb = await getAllPrepsData(prepsCollection, dbConnection);
 
       // WARNING WARNING WARNING
       // FOR TESTING ONLY. DELETES ALL ITEMS IN DB
