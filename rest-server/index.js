@@ -20,7 +20,7 @@ const {
 
 // var declarations
 //
-const proposalsCollection = process.env.proposalsCollection;
+const proposalsCollection = process.env.PROPOSALS_COLLECTION;
 const prepsCollection = process.env.PREPS_COLLECTION;
 let DB_CONNECTION = null;
 let DB_IS_CONNECTED = 0;
@@ -109,49 +109,11 @@ async function runAsync() {
 
   // ENDPOINTS
   //
-  // GET preps
-  app.get("/node-butler/preps", cors(corsOptions), async (req, res) => {
+  // GET proposals
+  app.get("/node-butler/cps-proposals", cors(corsOptions), async (req, res) => {
     // predifined response in case of failure on the server side
     let query = { res: null, status: 500 };
-
-    // if the request Accepts json
-    if (req.accepts(["json", "application/json"])) {
-      // handle request accordingly depending on database status
-      if (DB_CONNECTION == null) {
-        // if mongodb is offline send response with status 500
-        res.set("Connection", "close").status(500);
-        query = {
-          res: "cant connect to db",
-          db_msg: DB_CONNECTION,
-          status: 500
-        };
-      } else {
-        // if mongodb is online send response with the result of the
-        // query and status 200
-        query = await getAllPrepsData(prepsCollection, DB_CONNECTION);
-        res.set("Connection", "close").status(200);
-      }
-    } else {
-      res.set("Connection", "close").status(406);
-      query = {
-        res: "Unsopported 'Content-Type'",
-        status: 406
-      };
-    }
-
-    // make response
-    res.json(query);
-    res.end();
-  });
-
-  // GET prep data
-  app.get(
-    "/node-butler/preps/:address",
-    cors(corsOptions),
-    async (req, res) => {
-      // predifined response in case of failure on the server side
-      let query = { res: null, status: 500 };
-
+    try {
       // if the request Accepts json
       if (req.accepts(["json", "application/json"])) {
         // handle request accordingly depending on database status
@@ -166,12 +128,7 @@ async function runAsync() {
         } else {
           // if mongodb is online send response with the result of the
           // query and status 200
-          const prepAddress = req.params.address;
-          query = await getPrepByPrepAddress(
-            prepAddress,
-            prepsCollection,
-            DB_CONNECTION
-          );
+          query = await getAllProposals(proposalsCollection, DB_CONNECTION);
           res.set("Connection", "close").status(200);
         }
       } else {
@@ -181,47 +138,100 @@ async function runAsync() {
           status: 406
         };
       }
-
-      // make response
-      res.json(query);
-      res.end();
+    } catch (err) {
+      console.log("Server error");
+      console.log(err);
     }
-  );
-
-  // GET proposals
-  app.get("/node-butler/cps-proposals", cors(corsOptions), async (req, res) => {
+    // make response
+    res.json(query);
+    res.end();
+  });
+  // GET preps
+  app.get("/node-butler/preps", cors(corsOptions), async (req, res) => {
     // predifined response in case of failure on the server side
     let query = { res: null, status: 500 };
-
-    // if the request Accepts json
-    if (req.accepts(["json", "application/json"])) {
-      // handle request accordingly depending on database status
-      if (DB_CONNECTION == null) {
-        // if mongodb is offline send response with status 500
-        res.set("Connection", "close").status(500);
-        query = {
-          res: "cant connect to db",
-          db_msg: DB_CONNECTION,
-          status: 500
-        };
+    try {
+      // if the request Accepts json
+      if (req.accepts(["json", "application/json"])) {
+        // handle request accordingly depending on database status
+        if (DB_CONNECTION == null) {
+          // if mongodb is offline send response with status 500
+          res.set("Connection", "close").status(500);
+          query = {
+            res: "cant connect to db",
+            db_msg: DB_CONNECTION,
+            status: 500
+          };
+        } else {
+          // if mongodb is online send response with the result of the
+          // query and status 200
+          query = await getAllPrepsData(prepsCollection, DB_CONNECTION);
+          res.set("Connection", "close").status(200);
+        }
       } else {
-        // if mongodb is online send response with the result of the
-        // query and status 200
-        query = await getAllProposals(proposalsCollection, DB_CONNECTION);
-        res.set("Connection", "close").status(200);
+        res.set("Connection", "close").status(406);
+        query = {
+          res: "Unsopported 'Content-Type'",
+          status: 406
+        };
       }
-    } else {
-      res.set("Connection", "close").status(406);
-      query = {
-        res: "Unsopported 'Content-Type'",
-        status: 406
-      };
+    } catch (err) {
+      console.log("Server error");
+      console.log(err);
     }
 
     // make response
     res.json(query);
     res.end();
   });
+
+  // GET prep data
+  app.get(
+    "/node-butler/preps/:address",
+    cors(corsOptions),
+    async (req, res) => {
+      // predifined response in case of failure on the server side
+      let query = { res: null, status: 500 };
+      try {
+        // if the request Accepts json
+        if (req.accepts(["json", "application/json"])) {
+          // handle request accordingly depending on database status
+          if (DB_CONNECTION == null) {
+            // if mongodb is offline send response with status 500
+            res.set("Connection", "close").status(500);
+            query = {
+              res: "cant connect to db",
+              db_msg: DB_CONNECTION,
+              status: 500
+            };
+          } else {
+            // if mongodb is online send response with the result of the
+            // query and status 200
+            const prepAddress = req.params.address;
+            query = await getPrepByPrepAddress(
+              prepAddress,
+              prepsCollection,
+              DB_CONNECTION
+            );
+            res.set("Connection", "close").status(200);
+          }
+        } else {
+          res.set("Connection", "close").status(406);
+          query = {
+            res: "Unsopported 'Content-Type'",
+            status: 406
+          };
+        }
+      } catch (err) {
+        console.log("Server error");
+        console.log(err);
+      }
+
+      // make response
+      res.json(query);
+      res.end();
+    }
+  );
 
   // run server
   app.listen(process.env.REST_PORT, () => {
