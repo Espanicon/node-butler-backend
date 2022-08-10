@@ -49,6 +49,7 @@ async function restServerTest() {
   );
   console.log(query);
 }
+
 async function dbManagerTest() {
   // setting up in db to run tests
   try {
@@ -90,12 +91,15 @@ async function dbManagerTest() {
     console.log(err);
   }
 }
+
 async function runAllTests() {
   // rest server tests
-  await restServerTest();
+  // console.log('Running test on rest server')
+  // await restServerTest();
 
   // db-manager tests
-  // await dbManagerTest();
+  console.log("Running test on dbManager");
+  await dbManagerTest();
 }
 
 runAllTests();

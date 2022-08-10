@@ -27,6 +27,18 @@ async function getProposalByParams(params, collectionId, db) {
   return query;
 }
 
+async function getProposalByHash(hash, collectionId, db) {
+  /*
+   * gets proposal by hash
+   */
+  const query = await getProposalByParams(
+    { ipfs_hash: hash },
+    collectionId,
+    db
+  );
+  return query;
+}
+
 async function getReducedProposalByParams(params, selectObj, collectionId, db) {
   /*
    *
@@ -222,8 +234,10 @@ module.exports = {
   getProposalById,
   getProposalsByStatus,
   getProposalsByStatusCount,
+  getProposalByHash,
   getProposalCommentsByProposalId,
   updateProposalCommentsByProposalId,
+  updateProposalStatusByProposalId,
   getProposalsHash,
   deleteOneProposalByProposalHash
 };

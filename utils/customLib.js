@@ -4,6 +4,9 @@
 const EspaniconSDKNode = require("@espanicon/espanicon-sdk");
 const url = require("url");
 const customRequest = require("./customRequest");
+// const { proposalStates } = require("../database/commons");
+// console.log("proposal states");
+// console.log(proposalStates);
 
 class NodeButlerSDK extends EspaniconSDKNode {
   constructor() {

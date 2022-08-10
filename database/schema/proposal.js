@@ -85,9 +85,7 @@ const ProposalSchema = new mongoose.Schema({
     required: [true, "Please specify field"]
   },
   sponsor_deposit_status: {
-    type: String,
-    enum: [...sponsorDepositStatus],
-    required: [true, "Please specify field"]
+    type: String
   },
   sponsor_vote_reason: {
     type: String

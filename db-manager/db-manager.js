@@ -10,8 +10,10 @@ const {
   getProposalById,
   getProposalsByStatus,
   getProposalsByStatusCount,
+  getProposalByHash,
   getProposalCommentsByProposalId,
   updateProposalCommentsByProposalId,
+  updateProposalStatusByProposalId,
   getProposalsHash,
   deleteOneProposalByProposalHash
 } = require("../database/services/proposal");
@@ -47,62 +49,27 @@ async function dbManager(dbConnection, proposalsCollection, prepsCollection) {
       console.log(`Found ${proposalsHash.length} entries in db`);
 
       // update proposals in db
+      console.log('!---------->\nRunning "updateProposalsInDb"');
       await updateProposalsInDb(
         proposalsHash,
         dbConnection,
         proposalsCollection
       );
 
-      // get data on all preps
-      // run getPreps
-      const query = await lib.getPreps();
-      const preps = query.preps;
-      // console.log("preps");
-      // console.log(preps);
+      // update all proposals status and comments
+      console.log(
+        '!---------->\nRunning "updateProposalsCommentsAndStatusInDB"'
+      );
+      await updateProposalsCommentsAndStatusInDB(
+        dbConnection,
+        proposalsCollection
+      );
 
-      // update all preps in the database
-      for (let eachPrep of preps) {
-        console.log(`address ${eachPrep.address}`);
-        const dbPrep = await getPrepByPrepAddress(
-          eachPrep.address,
-          prepsCollection,
-          dbConnection
-        );
+      // update Preps in db
+      console.log('!---------->\nRunning "updatePrepsInDB"');
+      await updatePrepsInDB(prepsCollection, dbConnection);
 
-        // get prep details
-        const newDetails = await lib.getPrepsDetails(eachPrep.details);
-
-        // parse prep details
-        const hasValidDetails = newDetails == null ? false : true;
-        const newDetailsStringified =
-          newDetails == null ? "null" : JSON.stringify(newDetails);
-
-        // add/update prep details in db
-        if (dbPrep.length < 1) {
-          // if no result back from db we create the prep in the db
-          const newPrepInDb = await createPrep(
-            {
-              address: eachPrep.address,
-              details: newDetailsStringified,
-              has_valid_details: hasValidDetails
-            },
-            prepsCollection,
-            dbConnection
-          );
-        } else {
-          // if the prep exists we update the details.json
-          const newPrepInDb = await updatePrepById(
-            {
-              details: newDetailsStringified,
-              has_valid_details: hasValidDetails
-            },
-            dbPrep[0]["_id"],
-            prepsCollection,
-            dbConnection
-          );
-        }
-      }
-
+      // TEST
       // get all preps in db
       // const allPrepsInDb = await getAllPrepsData(prepsCollection, dbConnection);
 
@@ -114,6 +81,108 @@ async function dbManager(dbConnection, proposalsCollection, prepsCollection) {
   } catch (err) {
     console.log("Error running main async code");
     console.log(err);
+  }
+}
+
+async function updatePrepsInDB(prepsCollection, dbConnection) {
+  //
+  // get data on all preps
+  // run getPreps
+  const query = await lib.getPreps();
+  const preps = query.preps;
+  // console.log("preps");
+  // console.log(preps);
+
+  // update all preps in the database
+  for (let eachPrep of preps) {
+    console.log("!------>\n");
+    console.log(`address ${eachPrep.address}`);
+    const dbPrep = await getPrepByPrepAddress(
+      eachPrep.address,
+      prepsCollection,
+      dbConnection
+    );
+
+    // get prep details
+    const newDetails = await lib.getPrepsDetails(eachPrep.details);
+
+    // parse prep details
+    const hasValidDetails = newDetails == null ? false : true;
+    const newDetailsStringified =
+      newDetails == null ? "null" : JSON.stringify(newDetails);
+
+    // add/update prep details in db
+    if (dbPrep.length < 1) {
+      // if no result back from db we create the prep in the db
+      const newPrepInDb = await createPrep(
+        {
+          address: eachPrep.address,
+          details: newDetailsStringified,
+          has_valid_details: hasValidDetails
+        },
+        prepsCollection,
+        dbConnection
+      );
+    } else {
+      // if the prep exists we update the details.json
+      const newPrepInDb = await updatePrepById(
+        {
+          details: newDetailsStringified,
+          has_valid_details: hasValidDetails
+        },
+        dbPrep[0]["_id"],
+        prepsCollection,
+        dbConnection
+      );
+    }
+  }
+}
+
+async function updateProposalsCommentsAndStatusInDB(
+  dbConnection,
+  proposalsCollection
+) {
+  //
+  // get the hash of each proposal in the db
+  const proposalsHash = await getProposalsHash(
+    proposalsCollection,
+    dbConnection
+  );
+
+  console.log(`Updating comments and status`);
+  for (let eachProposalHash of proposalsHash) {
+    const proposalInDb = await getProposalByHash(
+      eachProposalHash,
+      proposalsCollection,
+      dbConnection
+    );
+    const proposal = await lib.getCPSProposalDetailsByHash(eachProposalHash);
+    const comments = await lib.getCPSProposalVoteResultsByHash(
+      eachProposalHash
+    );
+    if (proposalInDb[0].status !== proposal.status) {
+      console.log(
+        `old status: ${proposalInDb[0].status}. new status: ${proposal.status}`
+      );
+      await updateProposalStatusByProposalId(
+        proposal.status,
+        proposalInDb[0]["_id"],
+        proposalsCollection,
+        dbConnection
+      );
+    }
+
+    if (proposalInDb[0].comments.length != comments.data.length) {
+      console.log(
+        `old comments length: ${proposalInDb[0].comments.length}. new comments length ${comments.data.length}`
+      );
+      await updateProposalCommentsByProposalId(
+        comments.data,
+        proposalInDb[0]["_id"],
+        proposalsCollection,
+        dbConnection
+      );
+    }
   }
 }
 
@@ -153,6 +222,10 @@ async function updateProposalsInDb(
           proposalsCollection,
           dbConnection
         );
+      } else {
+        // test to se why the proposal failed to be added to DB
+        // console.log("FAILED proposal -->");
+        // console.log(eachProposal);
       }
     }
     console.log("Finish updating db");

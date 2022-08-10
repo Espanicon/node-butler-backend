@@ -9,7 +9,8 @@ const proposalStates = [
   "_completed",
   "_disqualified",
   "_paused",
-  "_pending"
+  "_pending",
+  "_rejected"
 ];
 
 const sponsorDepositStatus = [

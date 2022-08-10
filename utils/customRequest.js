@@ -49,7 +49,11 @@ async function httpx(params, data = false, runSecured = true) {
           data = JSON.parse(rawData);
           resolve(data);
         } catch (err) {
-          data = { error: err.message, message: rawData };
+          let parsedRawData = rawData;
+          if (typeof rawData === "string") {
+            parsedRawData = rawData.slice(0, 50) + "...";
+          }
+          data = { error: err.message, message: parsedRawData };
           reject(data);
         }
       });
@@ -81,8 +85,9 @@ async function httpx(params, data = false, runSecured = true) {
     return await promisifiedQuery;
   } catch (err) {
     console.log("error while running promisifiedQuery");
-    console.log(err);
-    throw new Error("error connecting to node");
+    console.log(Object.keys(err));
+    console.log(err.message);
+    // throw new Error("error connecting to node");
   }
 }
 
@@ -113,17 +118,21 @@ async function customRequest(
       request = await httpx(params, data, false);
     }
 
-    if (request.error == null) {
-      // if there is no error
-      return request;
-    } else {
+    if (
+      typeof request === "object" &&
+      Object.keys(request).includes("error") &&
+      request.error != null
+    ) {
       throw new Error(
         "Request made successfully but returned Error from the node"
       );
+    } else {
+      // if there is no error
+      return request;
     }
   } catch (err) {
     console.log("Error running customRequest");
-    console.log(err.message);
+    console.log(err);
     console.log(request);
     return null;
   }
