@@ -81,7 +81,7 @@ async function dbManagerTest() {
 
     // run test on db-manager
     console.log("running test on dbManager");
-    await CPSAndPrepDbHelper(DB, proposalsCollectionTest, prepsCollectionTest);
+    // await CPSAndPrepDbHelper(DB, proposalsCollectionTest, prepsCollectionTest);
     await networkProposalDbHelper(DB, networkProposalCollection);
 
     // closing db
