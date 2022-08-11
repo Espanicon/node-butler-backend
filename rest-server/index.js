@@ -22,6 +22,7 @@ const {
 //
 const proposalsCollection = process.env.PROPOSALS_COLLECTION;
 const prepsCollection = process.env.PREPS_COLLECTION;
+const networkProposalCollection = process.env.NETWORK_PROP_COLLECTION;
 let DB_CONNECTION = null;
 let DB_IS_CONNECTED = 0;
 

@@ -5,13 +5,36 @@
 //
 require("dotenv").config();
 const DB = require("../database/mongo");
-const dbManager = require("./db-manager");
+const { CPSAndPrepDbHelper, networkProposalDbHelper } = require("./db-manager");
 
 const INTERVALS = { oneDay: 1000 * 60 * 60 * 24, oneMinute: 1000 * 60 };
 let CONNECTION_SUCCESS = false;
 let DB_CONNECTION = null;
 const proposalsCollection = process.env.PROPOSALS_COLLECTION;
 const prepsCollection = process.env.PREPS_COLLECTION;
+const networkProposalCollection = process.env.NETWORK_PROP_COLLECTION;
+
+async function task1() {
+  await CPSAndPrepDbHelper(DB_CONNECTION, proposalsCollection, prepsCollection);
+}
+async function task2() {
+  await networkProposalDbHelper(DB_CONNECTION, networkProposalCollection);
+}
+async function tasksRunner(taskCallback) {
+  // connect to db
+  await connectDB();
+
+  // check if db is connected and run check
+  if (CONNECTION_SUCCESS) {
+    await taskCallback();
+  } else {
+    console.log("mongo is offline, skipping check");
+  }
+  // closing connection to db
+  await DB.closeDatabase(DB_CONNECTION);
+  DB_CONNECTION = null;
+  console.log("db closed");
+}
 
 async function connectDB() {
   //
@@ -32,27 +55,10 @@ async function connectDB() {
     CONNECTION_SUCCESS = false;
   }
 }
-
-async function asyncRun() {
-  // connect to db
-  await connectDB();
-
-  // check if db is connected and run check
-  if (CONNECTION_SUCCESS) {
-    await dbManager(DB_CONNECTION, proposalsCollection, prepsCollection);
-  } else {
-    console.log("mongo is offline, skipping check");
-  }
-  // closing connection to db
-  await DB.closeDatabase(DB_CONNECTION);
-  DB_CONNECTION = null;
-  console.log("db closed");
-}
-
 // set recursive tasks
 // set task that runs once a day to update db IF mongo is online
 const task = setInterval(async () => {
-  await asyncRun();
+  await tasksRunner(task1);
 }, INTERVALS.oneDay);
 
 // Enable graceful stop
@@ -70,5 +76,6 @@ const RUN_ONE_CHECK_NOW = true;
 
 if (RUN_ONE_CHECK_NOW) {
   // run at the beginning once
-  asyncRun();
+  tasksRunner(task1);
+  tasksRunner(task2);
 }

@@ -5,7 +5,11 @@ const proposalTest = require("./proposal.test");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const mongoose = require("mongoose");
 const db = require("../database/mongo");
-const dbManager = require("../db-manager/db-manager");
+const {
+  CPSAndPrepDbHelper,
+  networkProposalDbHelper
+} = require("../db-manager/db-manager");
+
 const NodeButlerSDK = require("../utils/customLib");
 
 const lib = new NodeButlerSDK();
@@ -15,6 +19,7 @@ let DB = null;
 let mongod = null;
 const proposalsCollectionTest = "test-proposals";
 const prepsCollectionTest = "test-preps";
+const networkProposalCollection = "test-network";
 
 const db_test = require("./memoryMongo");
 
@@ -76,7 +81,8 @@ async function dbManagerTest() {
 
     // run test on db-manager
     console.log("running test on dbManager");
-    await dbManager(DB, proposalsCollectionTest, prepsCollectionTest);
+    // await CPSAndPrepDbHelper(DB, proposalsCollectionTest, prepsCollectionTest);
+    await networkProposalDbHelper(DB, networkProposalCollection);
 
     // closing db
     if (RUN_MEMORY_TEST) {

@@ -30,7 +30,27 @@ const {
 const NodeButlerSDK = require("../utils/customLib");
 const lib = new NodeButlerSDK();
 
-async function dbManager(dbConnection, proposalsCollection, prepsCollection) {
+async function updateNetworkProposals(dbConnection, networkProposalCollection) {
+  // fetch all network proposals
+  const allNetworkProposals = await lib.getAllNetworkProposals();
+  console.log(allNetworkProposals);
+  // by network proposal ID check one by one and add the proposals missing
+  // in the db
+}
+
+async function networkProposalDbHelper(
+  dbConnection,
+  networkProposalCollection
+) {
+  //
+  await updateNetworkProposals(dbConnection, networkProposalCollection);
+}
+
+async function CPSAndPrepDbHelper(
+  dbConnection,
+  proposalsCollection,
+  prepsCollection
+) {
   // console.log("collections");
   // console.log(proposalsCollection);
   // console.log(prepsCollection);
@@ -275,4 +295,6 @@ async function deleteAllProposalsInDb(
     );
   }
 }
+
+const dbManager = { CPSAndPrepDbHelper, networkProposalDbHelper };
 module.exports = dbManager;
