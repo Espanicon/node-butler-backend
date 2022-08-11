@@ -5,7 +5,11 @@
 //
 require("dotenv").config();
 const DB = require("../database/mongo");
-const { CPSAndPrepDbHelper, networkProposalDbHelper } = require("./db-manager");
+const {
+  CPSAndPrepDbHelper,
+  networkProposalDbHelper,
+  activeNetworkProposalDbHelper
+} = require("./db-manager");
 
 const INTERVALS = { oneDay: 1000 * 60 * 60 * 24, oneMinute: 1000 * 60 };
 let CONNECTION_SUCCESS = false;

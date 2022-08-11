@@ -38,11 +38,16 @@ async function updateNetworkProposals(dbConnection, networkProposalCollection) {
   // in the db
 }
 
+async function activeNetworkProposalDbHelper() {
+  // checks every minute for active network proposals for voting. it updates
+  // the votes on the active network proposals
+  // TODO: this would probably be better to handle on the front end
+}
 async function networkProposalDbHelper(
   dbConnection,
   networkProposalCollection
 ) {
-  //
+  // runs every hour and updates the network proposals in the db
   await updateNetworkProposals(dbConnection, networkProposalCollection);
 }
 
@@ -296,5 +301,9 @@ async function deleteAllProposalsInDb(
   }
 }
 
-const dbManager = { CPSAndPrepDbHelper, networkProposalDbHelper };
+const dbManager = {
+  CPSAndPrepDbHelper,
+  networkProposalDbHelper,
+  activeNetworkProposalDbHelper
+};
 module.exports = dbManager;
