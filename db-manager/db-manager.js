@@ -29,7 +29,9 @@ const {
 
 const {
   createNetworkProposal,
-  getNetworkProposalByNetworkProposalId
+  getNetworkProposalByNetworkProposalId,
+  updateNetworkProposalByNetworkProposalId,
+  parseNetworkProposal
 } = require("../database/services/networkProposal");
 
 const NodeButlerSDK = require("../utils/customLib");
@@ -66,6 +68,8 @@ async function networkProposalDbHelper(
     let proposalInDb = null;
     if (oldProposalInDb.length < 1) {
       // if proposal is not already in db, add proposal to db
+      console.log("adding proposal to db");
+      console.log(`proposal id: ${eachProposal.id}`);
       proposalInDb = await createNetworkProposal(
         eachProposal,
         networkProposalCollection,
@@ -73,25 +77,38 @@ async function networkProposalDbHelper(
       );
     } else {
       // if proposal is already in db, update vote, apply and status
+      console.log("updating proposal in db");
+      console.log(`proposal id: ${eachProposal.id}`);
+      const parsedNetworkProposal = parseNetworkProposal(eachProposal);
+      proposalInDb = await updateNetworkProposalByNetworkProposalId(
+        {
+          vote: { ...parsedNetworkProposal.vote },
+          apply: { ...parsedNetworkProposal.apply },
+          status: parsedNetworkProposal.status
+        },
+        oldProposalInDb[0]["_id"],
+        networkProposalCollection,
+        dbConnection
+      );
     }
-    console.log("Result of adding network proposal to db");
-    console.log(proposalInDb);
+    // console.log("Result of adding network proposal to db");
+    // console.log(proposalInDb);
 
     // test
-    idOfLastNetworkProposalFetchedFromDb = eachProposal.id;
-    console.log("proposal was already in db");
-    console.log(oldProposalInDb);
+    // idOfLastNetworkProposalFetchedFromDb = eachProposal.id;
+    // console.log("proposal was already in db");
+    // console.log(oldProposalInDb);
     // test
   }
 
   // test
-  const lastProposalAddedToDb = await getNetworkProposalByNetworkProposalId(
-    idOfLastNetworkProposalFetchedFromDb,
-    networkProposalCollection,
-    dbConnection
-  );
-  console.log("last added proposal in db");
-  console.log(lastProposalAddedToDb);
+  // const lastProposalAddedToDb = await getNetworkProposalByNetworkProposalId(
+  //   idOfLastNetworkProposalFetchedFromDb,
+  //   networkProposalCollection,
+  //   dbConnection
+  // );
+  // console.log("last added proposal in db");
+  // console.log(lastProposalAddedToDb);
   // test
 
   // by network proposal ID check one by one and add the proposals missing

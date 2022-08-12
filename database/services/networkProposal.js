@@ -222,5 +222,6 @@ module.exports = {
   getNetworkProposalsId,
   createNetworkProposal,
   updateNetworkProposalByNetworkProposalId,
-  deleteOneNetworkProposalByProposalId
+  deleteOneNetworkProposalByProposalId,
+  parseNetworkProposal
 };
