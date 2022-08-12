@@ -113,6 +113,36 @@ async function getNetworkProposalsId(collectionId, db) {
   return parsedResult;
 }
 
+// parse networkProposal
+//
+function parseNetworkProposal(rawNetworkProposal) {
+  let parsedNetworkProposal = {
+    apply: {
+      was_applied: rawNetworkProposal.apply == null ? true : false,
+      address:
+        rawNetworkProposal.apply == null
+          ? ""
+          : rawNetworkProposal.apply.address,
+      id: rawNetworkProposal.apply == null ? "" : rawNetworkProposal.apply.id,
+      name:
+        rawNetworkProposal.apply == null ? "" : rawNetworkProposal.apply.name,
+      timestamp:
+        rawNetworkProposal.apply == null
+          ? ""
+          : rawNetworkProposal.apply.timestamp
+    },
+    contents: { ...rawNetworkProposal.contents },
+    vote: { ...rawNetworkProposal.vote },
+    endBlockHeight: rawNetworkProposal.endBlockHeight,
+    id: rawNetworkProposal.id,
+    proposer: rawNetworkProposal.proposer,
+    proposerName: rawNetworkProposal.proposerName,
+    startBlockHeight: rawNetworkProposal.startBlockHeight,
+    status: rawNetworkProposal.status
+  };
+
+  return parsedNetworkProposal;
+}
 // UPDATE and/or CREATE methods
 //
 async function createNetworkProposal(proposalData, collectionId, db) {
@@ -126,7 +156,7 @@ async function createNetworkProposal(proposalData, collectionId, db) {
   let newProposal = null;
 
   // parse data comming from CPS smart contracts
-  let parsedProposalData = proposalData;
+  let parsedProposalData = parseNetworkProposal(proposalData);
 
   try {
     const NetworkProposalModel = db.model(

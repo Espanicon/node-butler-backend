@@ -9,10 +9,10 @@ const mongoose = require("mongoose");
 const NetworkProposalSchema = new mongoose.Schema({
   apply: {
     was_applied: { type: Boolean, required: [true, "Please specify field"] },
-    address: { type: String, required: [true, "Please specify field"] },
-    id: { type: String, required: [true, "Please specify field"] },
-    name: { type: String, required: [true, "Please specify field"] },
-    timestamp: { type: String, required: [true, "Please specify field"] }
+    address: { type: String },
+    id: { type: String },
+    name: { type: String },
+    timestamp: { type: String }
   },
   contents: {
     description: { type: String, required: [true, "Please specify field"] },
@@ -20,16 +20,38 @@ const NetworkProposalSchema = new mongoose.Schema({
     type: { type: String, required: [true, "Please specify field"] }
   },
   vote: {
-    agree: { type: String },
-    disagree: { type: String },
-    noVote: { type: String }
+    agree: {
+      amount: {
+        type: String
+      },
+      count: {
+        type: String
+      }
+    },
+    disagree: {
+      amount: {
+        type: String
+      },
+      count: {
+        type: String
+      }
+    },
+
+    noVote: {
+      amount: {
+        type: String
+      },
+      count: {
+        type: String
+      }
+    }
   },
   endBlockHeight: { type: String, required: [true, "Please specify field"] },
   id: { type: String, required: [true, "Please specify field"] },
   proposer: { type: String, required: [true, "Please specify field"] },
   proposerName: { type: String, required: [true, "Please specify field"] },
   startBlockHeight: { type: String, required: [true, "Please specify field"] },
-  height: { type: String, required: [true, "Please specify field"] }
+  status: { type: String, required: [true, "Please specify field"] }
 });
 
 module.exports = {

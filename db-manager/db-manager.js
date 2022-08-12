@@ -27,16 +27,18 @@ const {
   deleteOnePrepByPrepAddress
 } = require("../database/services/preps");
 
+const {
+  createNetworkProposal,
+  getNetworkProposalByNetworkProposalId
+} = require("../database/services/networkProposal");
+
 const NodeButlerSDK = require("../utils/customLib");
 const lib = new NodeButlerSDK();
 
-async function updateNetworkProposals(dbConnection, networkProposalCollection) {
-  // fetch all network proposals
-  const allNetworkProposals = await lib.getAllNetworkProposals();
-  console.log(allNetworkProposals);
-  // by network proposal ID check one by one and add the proposals missing
-  // in the db
-}
+async function updateNetworkProposals(
+  dbConnection,
+  networkProposalCollection
+) {}
 
 async function activeNetworkProposalDbHelper() {
   // checks every minute for active network proposals for voting. it updates
@@ -48,7 +50,52 @@ async function networkProposalDbHelper(
   networkProposalCollection
 ) {
   // runs every hour and updates the network proposals in the db
-  await updateNetworkProposals(dbConnection, networkProposalCollection);
+  // fetch all network proposals
+  console.log('!---------->\nRunning "networkProposalDbHelper"');
+  const allNetworkProposals = await lib.getAllNetworkProposals();
+
+  let idOfLastNetworkProposalFetchedFromDb = null;
+  for (let eachProposal of allNetworkProposals) {
+    // query db to check if proposal was already in db
+    const oldProposalInDb = await getNetworkProposalByNetworkProposalId(
+      eachProposal.id,
+      networkProposalCollection,
+      dbConnection
+    );
+
+    let proposalInDb = null;
+    if (oldProposalInDb.length < 1) {
+      // if proposal is not already in db, add proposal to db
+      proposalInDb = await createNetworkProposal(
+        eachProposal,
+        networkProposalCollection,
+        dbConnection
+      );
+    } else {
+      // if proposal is already in db, update vote, apply and status
+    }
+    console.log("Result of adding network proposal to db");
+    console.log(proposalInDb);
+
+    // test
+    idOfLastNetworkProposalFetchedFromDb = eachProposal.id;
+    console.log("proposal was already in db");
+    console.log(oldProposalInDb);
+    // test
+  }
+
+  // test
+  const lastProposalAddedToDb = await getNetworkProposalByNetworkProposalId(
+    idOfLastNetworkProposalFetchedFromDb,
+    networkProposalCollection,
+    dbConnection
+  );
+  console.log("last added proposal in db");
+  console.log(lastProposalAddedToDb);
+  // test
+
+  // by network proposal ID check one by one and add the proposals missing
+  // in the db
 }
 
 async function CPSAndPrepDbHelper(
