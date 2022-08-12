@@ -68,7 +68,7 @@ async function networkProposalDbHelper(
     let proposalInDb = null;
     if (oldProposalInDb.length < 1) {
       // if proposal is not already in db, add proposal to db
-      console.log("adding proposal to db");
+      console.log("adding network proposal to db");
       console.log(`proposal id: ${eachProposal.id}`);
       proposalInDb = await createNetworkProposal(
         eachProposal,
@@ -77,7 +77,7 @@ async function networkProposalDbHelper(
       );
     } else {
       // if proposal is already in db, update vote, apply and status
-      console.log("updating proposal in db");
+      console.log("updating network proposal in db");
       console.log(`proposal id: ${eachProposal.id}`);
       const parsedNetworkProposal = parseNetworkProposal(eachProposal);
       proposalInDb = await updateNetworkProposalByNetworkProposalId(

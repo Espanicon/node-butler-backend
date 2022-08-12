@@ -13,7 +13,7 @@ const {
 const NodeButlerSDK = require("../utils/customLib");
 
 const lib = new NodeButlerSDK();
-const RUN_MEMORY_TEST = true;
+const RUN_MEMORY_TEST = false;
 
 let DB = null;
 let mongod = null;
@@ -85,7 +85,7 @@ async function dbManagerTest() {
     // console.log('Running CPSAndPrepDbHelper')
     // await CPSAndPrepDbHelper(DB, proposalsCollectionTest, prepsCollectionTest);
 
-    console.log("Running CPSAndPrepDbHelper");
+    console.log("Running networkProposalDbhelper");
     await networkProposalDbHelper(DB, networkProposalCollection);
 
     // closing db

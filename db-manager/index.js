@@ -5,13 +5,13 @@
 //
 require("dotenv").config();
 const DB = require("../database/mongo");
-const {
-  CPSAndPrepDbHelper,
-  networkProposalDbHelper,
-  activeNetworkProposalDbHelper
-} = require("./db-manager");
+const { CPSAndPrepDbHelper, networkProposalDbHelper } = require("./db-manager");
 
-const INTERVALS = { oneDay: 1000 * 60 * 60 * 24, oneMinute: 1000 * 60 };
+const INTERVALS = {
+  oneDay: 1000 * 60 * 60 * 24,
+  oneMinute: 1000 * 60,
+  tenMinutes: 1000 * 60 * 10
+};
 let CONNECTION_SUCCESS = false;
 let DB_CONNECTION = null;
 const proposalsCollection = process.env.PROPOSALS_COLLECTION;
@@ -61,18 +61,24 @@ async function connectDB() {
 }
 // set recursive tasks
 // set task that runs once a day to update db IF mongo is online
-const task = setInterval(async () => {
+const intervalOfTask1 = setInterval(async () => {
   await tasksRunner(task1);
 }, INTERVALS.oneDay);
+
+const intervalOfTask2 = setInterval(async () => {
+  await tasksRunner(task2);
+}, INTERVALS.tenMinutes);
 
 // Enable graceful stop
 process.once("SIGINT", () => {
   console.log("Terminating execution");
-  clearInterval(task);
+  clearInterval(intervalOfTask1);
+  clearInterval(intervalOfTask2);
   console.log("recursive tasks cleared");
 });
 process.once("SIGTERM", () => {
-  clearInterval(task);
+  clearInterval(intervalOfTask1);
+  clearInterval(intervalOfTask2);
 });
 
 // to run one check inmmediatly set to true the following variable
